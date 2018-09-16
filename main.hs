@@ -1,3 +1,7 @@
+import System.IO
+import System.Environment     
+
+
 -- entrada:
 
 -- a b a-pe 0.4 (origem, destino, metodo, tempo)
@@ -19,3 +23,23 @@
 -- saída:
 -- a a-pe b a-pe c linha-370 f a-pe h a-pe i (caminho)
 -- 17.5 (tempo total)
+
+tostr l = foldr (\x y -> if x == [] then "vazio/" ++ y else x ++ "/" ++ y) "" l
+nodestostr l = foldr (\(origin, destiny, method, length) y ->
+     "origin: " ++ origin ++ 
+     " destiny: " ++ destiny ++ 
+     " method: " ++ method ++ 
+     " length: " ++ length ++ "\n" ++ y) "" l
+
+getnodes l = map (\it -> linetonode (words it)) (filterlines l)
+    where
+        filterlines ([]:xs) = []
+        filterlines (x:xs) = (x :(filterlines xs))
+        linetonode [origin, destiny, method, length] = (origin, destiny, method, length)
+
+main = do 
+    putStrLn "Hello World"
+    contents <- getContents
+    let l = lines contents
+    let nodes = getnodes l
+    putStrLn (nodestostr nodes)
