@@ -1,4 +1,10 @@
 # projeto-haskell-mc346
 
-to compile: ➜  stack ghc main.hs
-to run: ➜ ./main < in
+### to compile: 
+```shell
+stack ghc main.hs
+```
+### to run:
+```shell
+./main < in
+```
