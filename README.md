@@ -2,9 +2,9 @@
 
 ### to compile: 
 ```shell
-stack ghc main.hs
+$ stack ghc main.hs
 ```
 ### to run:
 ```shell
-./main < in
+$ ./main < in
 ```
