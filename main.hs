@@ -40,12 +40,6 @@ data Grafo = Grafo {
     nos::[No]
 } deriving (Eq,Show,Read)
 
-
-tostr l = foldr (\x y -> if x == [] then "vazio/" ++ y else x ++ "/" ++ y) "" l
-nodestostr l = foldr (\no y ->
-     (show no) ++ "\n" ++ y) "" l
-
-
 getnodes l = cleanduplicates (map (\it -> linetonode (words it)) (filterlines l))
     where
         filterlines ([]:xs) = []
@@ -54,11 +48,16 @@ getnodes l = cleanduplicates (map (\it -> linetonode (words it)) (filterlines l)
             nome = origin,
             arestas = []
         }
+        cleanduplicates [] = []
         cleanduplicates (x:xs) = (x:(cleanduplicates (foldr (\it rest -> if it == x then rest else (it:rest))[] xs)))
+
+getlinks nodes l = nodes -- implementar isso
+
 
 main = do 
     putStrLn "Hello World"
     contents <- getContents
     let l = lines contents
     let nodes = getnodes l
-    putStrLn (nodestostr nodes)
+    let graph = Grafo { nos = getlinks nodes l}
+    putStrLn (show graph)
