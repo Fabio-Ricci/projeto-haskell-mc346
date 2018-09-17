@@ -2,6 +2,7 @@ import System.IO
 import System.Environment     
 
 
+
 -- entrada:
 
 -- a b a-pe 0.4 (origem, destino, metodo, tempo)
@@ -23,19 +24,35 @@ import System.Environment
 -- saída:
 -- a a-pe b a-pe c linha-370 f a-pe h a-pe i (caminho)
 -- 17.5 (tempo total)
+data Aresta = Aresta {
+    origem::No,
+    destino::No,
+    metodo::String,
+    peso:: String -- mudar para int
+} deriving (Eq,Show,Read)
+
+data No = No {
+    nome::String,
+    arestas::[Aresta]
+} deriving (Eq,Show,Read)
+
+data Grafo = Grafo {
+    nos::[No]
+} deriving (Eq,Show,Read)
+
 
 tostr l = foldr (\x y -> if x == [] then "vazio/" ++ y else x ++ "/" ++ y) "" l
-nodestostr l = foldr (\(origin, destiny, method, length) y ->
-     "origin: " ++ origin ++ 
-     " destiny: " ++ destiny ++ 
-     " method: " ++ method ++ 
-     " length: " ++ length ++ "\n" ++ y) "" l
+nodestostr l = foldr (\no y ->
+     (show no) ++ "\n" ++ y) "" l
 
 getnodes l = map (\it -> linetonode (words it)) (filterlines l)
     where
         filterlines ([]:xs) = []
         filterlines (x:xs) = (x :(filterlines xs))
-        linetonode [origin, destiny, method, length] = (origin, destiny, method, length)
+        linetonode [origin, destiny, method, length] = No {
+            nome = origin,
+            arestas = []
+        }
 
 main = do 
     putStrLn "Hello World"
