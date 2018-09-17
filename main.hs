@@ -45,7 +45,8 @@ tostr l = foldr (\x y -> if x == [] then "vazio/" ++ y else x ++ "/" ++ y) "" l
 nodestostr l = foldr (\no y ->
      (show no) ++ "\n" ++ y) "" l
 
-getnodes l = map (\it -> linetonode (words it)) (filterlines l)
+
+getnodes l = cleanduplicates (map (\it -> linetonode (words it)) (filterlines l))
     where
         filterlines ([]:xs) = []
         filterlines (x:xs) = (x :(filterlines xs))
@@ -53,6 +54,7 @@ getnodes l = map (\it -> linetonode (words it)) (filterlines l)
             nome = origin,
             arestas = []
         }
+        cleanduplicates (x:xs) = (x:(cleanduplicates (foldr (\it rest -> if it == x then rest else (it:rest))[] xs)))
 
 main = do 
     putStrLn "Hello World"
