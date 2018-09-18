@@ -40,24 +40,30 @@ data Grafo = Grafo {
     nos::[No]
 } deriving (Eq,Show,Read)
 
-getnodes l = cleanduplicates (map (\it -> linetonode (words it)) (filterlines l))
+getNodes l = cleanDuplicates (map (\it -> lineToNode (words it)) (filterLines l))
     where
-        filterlines ([]:xs) = []
-        filterlines (x:xs) = (x :(filterlines xs))
-        linetonode [origin, destiny, method, length] = No {
+        filterLines ([]:xs) = []
+        filterLines (x:xs) = (x :(filterLines xs))
+        lineToNode [origin, destination, method, length] = No {
             nome = origin,
             arestas = []
         }
-        cleanduplicates [] = []
-        cleanduplicates (x:xs) = (x:(cleanduplicates (foldr (\it rest -> if it == x then rest else (it:rest))[] xs)))
+        cleanDuplicates [] = []
+        cleanDuplicates (x:xs) = (x:(cleanDuplicates (foldr (\it rest -> if it == x then rest else (it:rest))[] xs)))
 
-getlinks nodes l = nodes -- implementar isso
-
+getLinks nodes l = nodes -- implementar isso
+--        where
+--            lineToEdge [origin, destination, method, length] = Aresta {
+--                origem = origin,
+--                destino = destination,
+--                metodo = method, 
+--                peso = lenght
+--            }
 
 main = do 
     putStrLn "Hello World"
     contents <- getContents
     let l = lines contents
-    let nodes = getnodes l
-    let graph = Grafo { nos = getlinks nodes l}
+    let nodes = getNodes l
+    let graph = Grafo { nos = getl=Links nodes l}
     putStrLn (show graph)
