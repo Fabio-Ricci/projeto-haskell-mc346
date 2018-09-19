@@ -25,8 +25,10 @@ import System.Environment
 -- a a-pe b a-pe c linha-370 f a-pe h a-pe i (caminho)
 -- 17.5 (tempo total)
 data Aresta = Aresta {
-    origem::No,
-    destino::No,
+    origem::String,
+    destino::String,
+    -- origem::No,
+    -- destino::No,
     metodo::String,
     peso:: String -- mudar para int
 } deriving (Eq,Show,Read)
@@ -37,7 +39,7 @@ data No = No {
 } deriving (Eq,Show,Read)
 
 data Grafo = Grafo {
-    nos::[No]
+    nos::[Aresta]
 } deriving (Eq,Show,Read)
 
 getNodes l = cleanDuplicates (map (\it -> lineToNode (words it)) (filterLines l))
@@ -51,19 +53,35 @@ getNodes l = cleanDuplicates (map (\it -> lineToNode (words it)) (filterLines l)
         cleanDuplicates [] = []
         cleanDuplicates (x:xs) = (x:(cleanDuplicates (foldr (\it rest -> if it == x then rest else (it:rest))[] xs)))
 
-getLinks nodes l = nodes -- implementar isso
---        where
---            lineToEdge [origin, destination, method, length] = Aresta {
---                origem = origin,
---                destino = destination,
---                metodo = method, 
---                peso = lenght
---            }
-
+getLinks nodes l = map (\it -> addEdgeToNode it nodes) (createEdges l)  -- implementar isso
+    where 
+        createEdges l = (map (\it -> lineToEdge (words it)) (filterLines l))
+        filterLines ([]:xs) = []
+        filterLines (x:xs) = (x :(filterLines xs))
+        addEdgeToNode (Aresta origin destination method length) ((No nome arestas):nos) 
+          | nome == origin = No {
+            nome = nome,
+            arestas = (arestas:Aresta {
+              origem = origin,
+              destino = destination,
+              metodo = method, 
+              peso = length
+            })
+          }
+          | otherwise = addEdgeToNode (origin, destination, method, length) nos
+        lineToEdge [origin, destination, method, length] = Aresta {
+            origem = origin,
+            destino = destination,
+            metodo = method, 
+            peso = length
+        }
+        
 main = do 
     putStrLn "Hello World"
+    --contents <- readFile "in.in"
     contents <- getContents
     let l = lines contents
     let nodes = getNodes l
-    let graph = Grafo { nos = getl=Links nodes l}
+    let graph = getLinks nodes l
+    Grafo { nos = getLinks nodes l}
     putStrLn (show graph)
