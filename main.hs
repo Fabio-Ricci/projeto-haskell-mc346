@@ -39,7 +39,7 @@ data No = No {
 } deriving (Eq,Show,Read)
 
 data Grafo = Grafo {
-    nos::[Aresta]
+    nos::[No]
 } deriving (Eq,Show,Read)
 
 getNodes l = cleanDuplicates (map (\it -> lineToNode (words it)) (filterLines l))
@@ -58,17 +58,17 @@ getLinks nodes l = map (\it -> addEdgeToNode it nodes) (createEdges l)  -- imple
         createEdges l = (map (\it -> lineToEdge (words it)) (filterLines l))
         filterLines ([]:xs) = []
         filterLines (x:xs) = (x :(filterLines xs))
-        addEdgeToNode (Aresta origin destination method length) ((No nome arestas):nos) 
+        addEdgeToNode (Aresta {origem = origin, destino = destination, metodo = method, peso = length}) ((No {nome = nome, arestas = arestas}):nos) 
           | nome == origin = No {
             nome = nome,
-            arestas = (arestas:Aresta {
+            arestas = (Aresta {
               origem = origin,
               destino = destination,
               metodo = method, 
               peso = length
-            })
+            }:arestas)
           }
-          | otherwise = addEdgeToNode (origin, destination, method, length) nos
+          | otherwise = addEdgeToNode Aresta {origem=origin, destino=destination, metodo=method, peso=length} nos
         lineToEdge [origin, destination, method, length] = Aresta {
             origem = origin,
             destino = destination,
@@ -82,6 +82,5 @@ main = do
     contents <- getContents
     let l = lines contents
     let nodes = getNodes l
-    let graph = getLinks nodes l
-    Grafo { nos = getLinks nodes l}
+    let graph =  Grafo { nos = getLinks nodes l}
     putStrLn (show graph)
