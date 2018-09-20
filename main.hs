@@ -53,12 +53,13 @@ getNodes l = cleanDuplicates (map (\it -> lineToNode (words it)) (filterLines l)
         cleanDuplicates [] = []
         cleanDuplicates (x:xs) = (x:(cleanDuplicates (foldr (\it rest -> if it == x then rest else (it:rest))[] xs)))
 
-getLinks nodes l = map (\it -> addEdgeToNode it nodes) (createEdges l)  -- implementar isso
+getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes  -- implementar isso
     where 
         createEdges l = (map (\it -> lineToEdge (words it)) (filterLines l))
         filterLines ([]:xs) = []
         filterLines (x:xs) = (x :(filterLines xs))
-        addEdgeToNode (Aresta {origem = origin, destino = destination, metodo = method, peso = length}) ((No {nome = nome, arestas = arestas}):nos) 
+        addEdgesToNode edges node = foldl (\n it -> addEdgeToNode it n) node edges
+        addEdgeToNode (Aresta {origem = origin, destino = destination, metodo = method, peso = length}) (No {nome = nome, arestas = arestas}) 
           | nome == origin = No {
             nome = nome,
             arestas = (Aresta {
@@ -80,8 +81,8 @@ getLinks nodes l = map (\it -> addEdgeToNode it nodes) (createEdges l)  -- imple
 
 main = do 
     putStrLn "Hello World"
-    --contents <- readFile "in.in"
-    contents <- getContents
+    contents <- readFile "in.in"
+    --contents <- getContents
     let l = lines contents
     let nodes = getNodes l
     let graph =  Grafo { nos = getLinks nodes l}
