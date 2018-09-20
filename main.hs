@@ -53,13 +53,13 @@ getNodes l = cleanDuplicates (map (\it -> lineToNode (words it)) (filterLines l)
         cleanDuplicates [] = []
         cleanDuplicates (x:xs) = (x:(cleanDuplicates (foldr (\it rest -> if it == x then rest else (it:rest))[] xs)))
 
-getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes  -- implementar isso
-    where 
+getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes-- implementar isso
+    where
         createEdges l = (map (\it -> lineToEdge (words it)) (filterLines l))
         filterLines ([]:xs) = []
         filterLines (x:xs) = (x :(filterLines xs))
         addEdgesToNode edges node = foldl (\n it -> addEdgeToNode it n) node edges
-        addEdgeToNode (Aresta {origem = origin, destino = destination, metodo = method, peso = length}) (No {nome = nome, arestas = arestas}) 
+        addEdgeToNode (Aresta {origem = origin, destino = destination, metodo = method, peso = length}) (No {nome = nome, arestas = arestas})
           | nome == origin = No {
             nome = nome,
             arestas = (Aresta {
@@ -69,20 +69,18 @@ getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes  -- impl
               peso = length
             }:arestas)
           }
-          | otherwise = addEdgeToNode Aresta {origem=origin, destino=destination, metodo=method, peso=length} nos
+          | otherwise = No {nome = nome, arestas = arestas}  
         lineToEdge [origin, destination, method, length] = Aresta {
             origem = origin,
             destino = destination,
             metodo = method, 
             peso = length
         }
-
---optimalpath Graph {nos=nos}= 
-
+        
 main = do 
     putStrLn "Hello World"
     contents <- readFile "in.in"
-    --contents <- getContents
+    -- contents <- getContents
     let l = lines contents
     let nodes = getNodes l
     let graph =  Grafo { nos = getLinks nodes l}
