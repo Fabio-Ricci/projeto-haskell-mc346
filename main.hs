@@ -75,7 +75,9 @@ getLinks nodes l = map (\it -> addEdgeToNode it nodes) (createEdges l)  -- imple
             metodo = method, 
             peso = length
         }
-        
+
+--optimalpath Graph {nos=nos}= 
+
 main = do 
     putStrLn "Hello World"
     --contents <- readFile "in.in"
