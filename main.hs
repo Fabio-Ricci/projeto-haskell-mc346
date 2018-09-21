@@ -42,11 +42,16 @@ data Grafo = Grafo {
     nos::[No]
 } deriving (Eq,Show,Read)
 
+data TempoDeEspera = TempoDeEspera {
+    tempo::String,
+    linha::String
+} deriving (Eq,Show,Read)
+
 getNodes l = cleanDuplicates (map (\it -> lineToNode (words it)) (filterLines l))
     where
         filterLines ([]:xs) = []
         filterLines (x:xs) = (x :(filterLines xs))
-        lineToNode [origin, destination, method, length] = No {
+        lineToNode [origin, _, _, _] = No {
             nome = origin,
             arestas = []
         }
@@ -76,12 +81,23 @@ getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes-- implem
             metodo = method, 
             peso = length
         }
-        
+
+-- arrumar
+getWaitingTimes l = (map (\it -> lineToWaitingTime (words it)) (filterLines (filterLines l)))
+        where         
+            filterLines ([]:xs) = [] -- problema aqui
+            filterLines (x:xs) = (x :(filterLines xs))
+            lineToWaitingTime [line, time] = TempoDeEspera {
+                linha=line,
+                tempo=time
+            }
 main = do 
     putStrLn "Hello World"
-    contents <- readFile "in.in"
-    -- contents <- getContents
+    -- contents <- readFile "in.in"
+    contents <- getContents
     let l = lines contents
     let nodes = getNodes l
+    let waitingTimes = getWaitingTimes l
     let graph =  Grafo { nos = getLinks nodes l}
     putStrLn (show graph)
+    putStrLn (foldr (\it rest -> (show it) ++ rest) "" waitingTimes)
