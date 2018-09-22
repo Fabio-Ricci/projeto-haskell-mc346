@@ -93,6 +93,10 @@ getWaitingTimes l = (map (\it -> lineToWaitingTime (words it)) (removeAfterEmpty
                 tempo= read time :: Float
             }
 
+getNodeByName nodes name = foldr (\it rest -> if name == (nome it) then Just it else Nothing) Nothing nodes
+
+getPossiblePaths Grafo { nos=nos } origin destination = getNodeByName nos origin
+
 main = do 
     putStrLn "Hello World"
     -- contents <- readFile "in.in"
@@ -103,3 +107,4 @@ main = do
     let graph =  Grafo { nos = getLinks nodes l}
     putStrLn (show graph)
     putStrLn (foldr (\it rest -> (show it) ++ rest) "" waitingTimes)
+    putStrLn (show(getPossiblePaths graph "a" "b"))
