@@ -82,10 +82,9 @@ getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes-- implem
             peso = read length :: Float
         }
 
--- arrumar
 getWaitingTimes l = (map (\it -> lineToWaitingTime (words it)) (removeAfterEmpty (removeBeforeEmpty l)))
         where         
-            removeAfterEmpty ([]:xs) = [] -- problema aqui
+            removeAfterEmpty ([]:xs) = [] 
             removeAfterEmpty (x:xs) = (x :(removeAfterEmpty xs))
             removeBeforeEmpty ([]:xs) = xs
             removeBeforeEmpty (_:xs) = (removeBeforeEmpty xs)
