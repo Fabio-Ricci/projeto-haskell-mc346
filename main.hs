@@ -30,7 +30,7 @@ data Aresta = Aresta {
     -- origem::No,
     -- destino::No,
     metodo::String,
-    peso:: String -- mudar para int
+    peso:: Float -- mudar para int
 } deriving (Eq,Show,Read)
 
 data No = No {
@@ -43,7 +43,7 @@ data Grafo = Grafo {
 } deriving (Eq,Show,Read)
 
 data TempoDeEspera = TempoDeEspera {
-    tempo::String,
+    tempo::Float,
     linha::String
 } deriving (Eq,Show,Read)
 
@@ -79,18 +79,21 @@ getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes-- implem
             origem = origin,
             destino = destination,
             metodo = method, 
-            peso = length
+            peso = read length :: Float
         }
 
 -- arrumar
-getWaitingTimes l = (map (\it -> lineToWaitingTime (words it)) (filterLines (filterLines l)))
+getWaitingTimes l = (map (\it -> lineToWaitingTime (words it)) (removeAfterEmpty (removeBeforeEmpty l)))
         where         
-            filterLines ([]:xs) = [] -- problema aqui
-            filterLines (x:xs) = (x :(filterLines xs))
+            removeAfterEmpty ([]:xs) = [] -- problema aqui
+            removeAfterEmpty (x:xs) = (x :(removeAfterEmpty xs))
+            removeBeforeEmpty ([]:xs) = xs
+            removeBeforeEmpty (_:xs) = (removeBeforeEmpty xs)
             lineToWaitingTime [line, time] = TempoDeEspera {
                 linha=line,
-                tempo=time
+                tempo= read time :: Float
             }
+
 main = do 
     putStrLn "Hello World"
     -- contents <- readFile "in.in"
