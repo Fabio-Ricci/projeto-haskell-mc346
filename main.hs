@@ -148,6 +148,9 @@ getShortestTime (path:paths) = foldl (\acc it -> if (getTotalTime it) < acc then
 getShortestPath :: [[Aresta]] -> [Aresta]
 getShortestPath (path:paths) = foldl (\acc it -> if (getTotalTime it) < (getTotalTime acc) then it else acc) path paths
 
+pathToString :: [Aresta] -> String
+pathToString path = (origem (head path)) ++ " " ++ foldr(\Aresta {destino=destino, metodo=metodo} rest -> metodo ++ " " ++ destino ++ " " ++ rest) "" path
+
 main = do 
     putStrLn "Hello World"
     -- contents <- readFile "in.in"
@@ -167,4 +170,4 @@ main = do
     putStrLn (show originDestination)
     putStrLn (show possiblePaths)
     putStrLn (show shortestTime)
-    putStrLn (show shortestPath)
+    putStrLn (pathToString shortestPath)
