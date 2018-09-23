@@ -1,6 +1,6 @@
 import System.IO
 import System.Environment     
-
+import Data.List
 
 
 -- entrada:
@@ -63,7 +63,7 @@ getNodes l = cleanDuplicates (foldr (\it rest -> it ++ rest) [] (map (\it -> lin
         cleanDuplicates [] = []
         cleanDuplicates (x:xs) = (x:(cleanDuplicates (foldr (\it rest -> if it == x then rest else (it:rest))[] xs)))
 
-getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes-- implementar isso
+getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes
     where
         createEdges l = (map (\it -> lineToEdge (words it)) (filterLines l))
         filterLines ([]:xs) = []
@@ -129,12 +129,22 @@ getPossiblePaths Grafo { nos=nos } origin destination = getPossiblePaths' nos (g
                     )
                     where 
                         flinks = (filteredLinks nodes (arestas origin) passed)
-            
+   
+getTotalTime :: [Aresta] -> Float
+getTotalTime [] = 0.0
+getTotalTime ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas) 
+  | isInfixOf "linha" method = (1.5*length) + (getTotalTime arestas)  
+  | otherwise = length + getTotalTime arestas
+  
+getShortestTime :: [[Aresta]] -> Float
+getShortestTime (path:paths) = foldl (\acc it -> if (getTotalTime it) < acc then (getTotalTime it) else acc) (getTotalTime path) paths
 
+getShortestPath :: [[Aresta]] -> [Aresta]
+getShortestPath (path:paths) = foldl (\acc it -> if (getTotalTime it) < (getTotalTime acc) then it else acc) path paths
 
 main = do 
     putStrLn "Hello World"
-    contents <- readFile "in"
+    contents <- readFile "in.in"
     -- contents <- getContents
     let l = lines contents
     let nodes = getNodes l
@@ -145,3 +155,5 @@ main = do
     --putStrLn (show (getNodeByName (nos graph) "a"))
     --putStrLn (show (filteredLinks (nos graph) (arestas (getNodeByName (nos graph) "a")) []))
     putStrLn (show (getPossiblePaths graph "a" "h"))
+    putStrLn (show (getShortestTime (getPossiblePaths graph "a" "h")))
+    putStrLn (show (getShortestPath (getPossiblePaths graph "a" "h")))
