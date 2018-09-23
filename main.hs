@@ -98,8 +98,14 @@ getWaitingTimes l = (map (\it -> lineToWaitingTime (words it)) (removeAfterEmpty
                 tempo= read time :: Float
             }
 
-getNodeByName nodes name = foldr (\it rest -> if name == (nome it) then it else rest) No{nome="not found", arestas=[]} nodes
+getOriginDestination l = lineToOriginDestination (words (head (removeBeforeEmpty (removeBeforeEmpty l))))
+            where
+                removeBeforeEmpty :: [String] -> [String]
+                removeBeforeEmpty ([]:xs) = xs
+                removeBeforeEmpty (_:xs) = (removeBeforeEmpty xs)
+                lineToOriginDestination [origin, destination] = (origin, destination)
 
+getNodeByName nodes name = foldr (\it rest -> if name == (nome it) then it else rest) No{nome="not found", arestas=[]} nodes
 
 notPassed :: [No] -> No -> Bool
 notPassed passedNodes node = foldr (\it rest -> if it == node then False else rest) True passedNodes
@@ -144,8 +150,8 @@ getShortestPath (path:paths) = foldl (\acc it -> if (getTotalTime it) < (getTota
 
 main = do 
     putStrLn "Hello World"
-    contents <- readFile "in.in"
-    -- contents <- getContents
+    -- contents <- readFile "in.in"
+    contents <- getContents
     let l = lines contents
     let nodes = getNodes l
     let waitingTimes = getWaitingTimes l
@@ -154,6 +160,11 @@ main = do
     --putStrLn (foldr (\it rest -> (show it) ++ rest) "" waitingTimes)
     --putStrLn (show (getNodeByName (nos graph) "a"))
     --putStrLn (show (filteredLinks (nos graph) (arestas (getNodeByName (nos graph) "a")) []))
-    putStrLn (show (getPossiblePaths graph "a" "h"))
-    putStrLn (show (getShortestTime (getPossiblePaths graph "a" "h")))
-    putStrLn (show (getShortestPath (getPossiblePaths graph "a" "h")))
+    let originDestination = getOriginDestination l
+    let possiblePaths = getPossiblePaths graph (fst originDestination) (snd originDestination)
+    let shortestTime = getShortestTime possiblePaths
+    let shortestPath = getShortestPath possiblePaths
+    putStrLn (show originDestination)
+    putStrLn (show possiblePaths)
+    putStrLn (show shortestTime)
+    putStrLn (show shortestPath)
