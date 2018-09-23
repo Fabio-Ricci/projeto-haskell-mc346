@@ -136,30 +136,37 @@ getPossiblePaths Grafo { nos=nos } origin destination = getPossiblePaths' nos (g
                     where 
                         flinks = (filteredLinks nodes (arestas origin) passed)
 
-getTotalTime :: [Aresta] -> Float
-getTotalTime [] = 0.0
-getTotalTime [(Aresta {origem = origin, destino = destination, metodo = method, peso = length})] = if (isInfixOf "linha" method) then (1.5*length) else length  
-getTotalTime ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas) = length + (getTotalTime' method arestas)
+getWaitingTime :: String -> [TempoDeEspera] -> Float              
+getWaitingTime _ [] = 0
+getWaitingTime method ((TempoDeEspera {tempo = time, linha = l}):tempos)
+    | method == l = 0.5*time
+    | otherwise = getWaitingTime method tempos
 
-getTotalTime' :: String -> [Aresta] -> Float
-getTotalTime' _ [] = 0.0
-getTotalTime' ant ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas)
-    | (isInfixOf "linha" method) && (ant /= method) = (1.5*length) + (getTotalTime' method arestas)
-    | otherwise = length + (getTotalTime' method arestas)
+getTotalTime :: [Aresta] -> [TempoDeEspera] -> Float
+getTotalTime [] waitingTimes = 0.0
+getTotalTime [(Aresta {origem = origin, destino = destination, metodo = method, peso = length})] waitingTimes =
+    if (isInfixOf "linha" method) then (getWaitingTime method waitingTimes) + length else length
+getTotalTime ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas) waitingTimes = (if (isInfixOf "linha" method) then (getWaitingTime method waitingTimes) + length else length) + (getTotalTime' method arestas waitingTimes)
+
+getTotalTime' :: String -> [Aresta] -> [TempoDeEspera] -> Float
+getTotalTime' _ [] waitingTimes = 0.0
+getTotalTime' ant ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas) waitingTimes
+    | (isInfixOf "linha" method) && (ant /= method) = (getWaitingTime method waitingTimes) + length + (getTotalTime' method arestas waitingTimes)
+    | otherwise = length + (getTotalTime' method arestas waitingTimes)
   
-getShortestTime :: [[Aresta]] -> Float
-getShortestTime (path:paths) = foldl (\acc it -> if (getTotalTime it) < acc then (getTotalTime it) else acc) (getTotalTime path) paths
+getShortestTime :: [[Aresta]] -> [TempoDeEspera] -> Float
+getShortestTime (path:paths) waitingTimes = foldl (\acc it -> if (getTotalTime it waitingTimes) < acc then (getTotalTime it waitingTimes) else acc) (getTotalTime path waitingTimes) paths
 
-getShortestPath :: [[Aresta]] -> [Aresta]
-getShortestPath (path:paths) = foldl (\acc it -> if (getTotalTime it) < (getTotalTime acc) then it else acc) path paths
+getShortestPath :: [[Aresta]] -> [TempoDeEspera] -> [Aresta]
+getShortestPath (path:paths) waitingTimes = foldl (\acc it -> if (getTotalTime it waitingTimes) < (getTotalTime acc waitingTimes) then it else acc) path paths
 
 pathToString :: [Aresta] -> String
 pathToString path = (origem (head path)) ++ " " ++ foldr(\Aresta {destino=destino, metodo=metodo} rest -> metodo ++ " " ++ destino ++ " " ++ rest) "" path
 
 main = do 
     putStrLn "Hello World"
-    -- contents <- readFile "in.in"
-    contents <- getContents
+    contents <- readFile "in.in"
+    -- contents <- getContents
     let l = lines contents
     let nodes = getNodes l
     let waitingTimes = getWaitingTimes l
@@ -170,8 +177,8 @@ main = do
     --putStrLn (show (filteredLinks (nos graph) (arestas (getNodeByName (nos graph) "a")) []))
     let originDestination = getOriginDestination l
     let possiblePaths = getPossiblePaths graph (fst originDestination) (snd originDestination)
-    let shortestTime = getShortestTime possiblePaths
-    let shortestPath = getShortestPath possiblePaths
+    let shortestTime = getShortestTime possiblePaths waitingTimes
+    let shortestPath = getShortestPath possiblePaths waitingTimes
     putStrLn (show originDestination)
     putStrLn (show possiblePaths)
     putStrLn (pathToString shortestPath)
