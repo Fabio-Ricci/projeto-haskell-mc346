@@ -47,14 +47,19 @@ data TempoDeEspera = TempoDeEspera {
     linha::String
 } deriving (Eq,Show,Read)
 
-getNodes l = cleanDuplicates (map (\it -> lineToNode (words it)) (filterLines l))
+getNodes l = cleanDuplicates (foldr (\it rest -> it ++ rest) [] (map (\it -> lineToNode (words it)) (filterLines l)))
     where
         filterLines ([]:xs) = []
         filterLines (x:xs) = (x :(filterLines xs))
-        lineToNode [origin, _, _, _] = No {
-            nome = origin,
-            arestas = []
-        }
+        lineToNode [origin, destination, _, _] = [
+            No {
+                nome = origin,
+                arestas = []
+            },
+            No {
+                nome = destination,
+                arestas = []
+            }]
         cleanDuplicates [] = []
         cleanDuplicates (x:xs) = (x:(cleanDuplicates (foldr (\it rest -> if it == x then rest else (it:rest))[] xs)))
 
@@ -93,18 +98,50 @@ getWaitingTimes l = (map (\it -> lineToWaitingTime (words it)) (removeAfterEmpty
                 tempo= read time :: Float
             }
 
-getNodeByName nodes name = foldr (\it rest -> if name == (nome it) then Just it else rest) Nothing nodes
+getNodeByName nodes name = foldr (\it rest -> if name == (nome it) then it else rest) No{nome="not found", arestas=[]} nodes
 
-getPossiblePaths Grafo { nos=nos } origin destination = getNodeByName nos origin
+
+notPassed :: [No] -> No -> Bool
+notPassed passedNodes node = foldr (\it rest -> if it == node then False else rest) True passedNodes
+
+filteredLinks :: [No] -> [Aresta] -> [No] -> [Aresta]
+filteredLinks _ [] _ = []
+filteredLinks nodes (x:xs) passed =  if (notPassed passed (getNodeByName nodes (origem x))) then (x:(filteredLinks nodes xs passed)) else (filteredLinks nodes xs passed)
+
+flatten :: [[[Aresta]]] -> [[Aresta]]
+flatten [] = []
+flatten (x:xs) = x ++ (flatten xs)
+
+getPossiblePaths :: Grafo -> String -> String -> [[Aresta]]
+getPossiblePaths Grafo { nos=nos } origin destination = getPossiblePaths' nos (getNodeByName nos origin) destination []
+            where
+                addOrigin :: Aresta -> [[Aresta]] -> [[Aresta]]
+                addOrigin link paths = map (\path -> (link:path)) paths 
+                getPossiblePaths' :: [No] -> No -> String -> [No] -> [[Aresta]]
+                getPossiblePaths' nodes origin destination passed
+                    | (nome origin) == destination = [[]]
+                    | flinks == [] = []
+                    | otherwise = flatten (
+                        map (\it -> 
+                            let p = (getPossiblePaths' nodes (getNodeByName nodes (destino it)) destination (origin:passed)) in
+                            addOrigin it p
+                            ) flinks
+                    )
+                    where 
+                        flinks = (filteredLinks nodes (arestas origin) passed)
+            
+
 
 main = do 
     putStrLn "Hello World"
-    -- contents <- readFile "in.in"
-    contents <- getContents
+    contents <- readFile "in"
+    -- contents <- getContents
     let l = lines contents
     let nodes = getNodes l
     let waitingTimes = getWaitingTimes l
     let graph =  Grafo { nos = getLinks nodes l}
     putStrLn (show graph)
-    putStrLn (foldr (\it rest -> (show it) ++ rest) "" waitingTimes)
-    putStrLn (show(getPossiblePaths graph "c" "b"))
+    --putStrLn (foldr (\it rest -> (show it) ++ rest) "" waitingTimes)
+    --putStrLn (show (getNodeByName (nos graph) "a"))
+    --putStrLn (show (filteredLinks (nos graph) (arestas (getNodeByName (nos graph) "a")) []))
+    putStrLn (show (getPossiblePaths graph "a" "h"))
