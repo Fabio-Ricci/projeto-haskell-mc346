@@ -135,12 +135,17 @@ getPossiblePaths Grafo { nos=nos } origin destination = getPossiblePaths' nos (g
                     )
                     where 
                         flinks = (filteredLinks nodes (arestas origin) passed)
-   
+
 getTotalTime :: [Aresta] -> Float
 getTotalTime [] = 0.0
-getTotalTime ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas) 
-  | isInfixOf "linha" method = (1.5*length) + (getTotalTime arestas)  
-  | otherwise = length + getTotalTime arestas
+getTotalTime [(Aresta {origem = origin, destino = destination, metodo = method, peso = length})] = if (isInfixOf "linha" method) then (1.5*length) else length  
+getTotalTime ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas) = length + (getTotalTime' method arestas)
+
+getTotalTime' :: String -> [Aresta] -> Float
+getTotalTime' _ [] = 0.0
+getTotalTime' ant ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas)
+    | (isInfixOf "linha" method) && (ant /= method) = (1.5*length) + (getTotalTime' method arestas)
+    | otherwise = length + (getTotalTime' method arestas)
   
 getShortestTime :: [[Aresta]] -> Float
 getShortestTime (path:paths) = foldl (\acc it -> if (getTotalTime it) < acc then (getTotalTime it) else acc) (getTotalTime path) paths
@@ -169,5 +174,5 @@ main = do
     let shortestPath = getShortestPath possiblePaths
     putStrLn (show originDestination)
     putStrLn (show possiblePaths)
-    putStrLn (show shortestTime)
     putStrLn (pathToString shortestPath)
+    putStrLn (show shortestTime)
