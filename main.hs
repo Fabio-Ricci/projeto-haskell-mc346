@@ -47,6 +47,7 @@ data TempoDeEspera = TempoDeEspera {
     linha::String
 } deriving (Eq,Show,Read)
 
+getNodes :: [String] -> [No]
 getNodes l = cleanDuplicates (foldr (\it rest -> it ++ rest) [] (map (\it -> lineToNode (words it)) (filterLines l)))
     where
         filterLines ([]:xs) = []
@@ -63,6 +64,7 @@ getNodes l = cleanDuplicates (foldr (\it rest -> it ++ rest) [] (map (\it -> lin
         cleanDuplicates [] = []
         cleanDuplicates (x:xs) = (x:(cleanDuplicates (foldr (\it rest -> if it == x then rest else (it:rest))[] xs)))
 
+getLinks :: [No] -> [String] -> [No]
 getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes
     where
         createEdges l = (map (\it -> lineToEdge (words it)) (filterLines l))
@@ -87,6 +89,7 @@ getLinks nodes l = map (\it -> addEdgesToNode (createEdges l) it) nodes
             peso = read length :: Float
         }
 
+getWaitingTimes :: [String] -> [TempoDeEspera]
 getWaitingTimes l = (map (\it -> lineToWaitingTime (words it)) (removeAfterEmpty (removeBeforeEmpty l)))
         where         
             removeAfterEmpty ([]:xs) = [] 
@@ -98,6 +101,7 @@ getWaitingTimes l = (map (\it -> lineToWaitingTime (words it)) (removeAfterEmpty
                 tempo= read time :: Float
             }
 
+getOriginDestination :: [String] -> (String, String)
 getOriginDestination l = lineToOriginDestination (words (head (removeBeforeEmpty (removeBeforeEmpty l))))
             where
                 removeBeforeEmpty :: [String] -> [String]
@@ -105,6 +109,7 @@ getOriginDestination l = lineToOriginDestination (words (head (removeBeforeEmpty
                 removeBeforeEmpty (_:xs) = (removeBeforeEmpty xs)
                 lineToOriginDestination [origin, destination] = (origin, destination)
 
+getNodeByName :: [No] -> String -> No
 getNodeByName nodes name = foldr (\it rest -> if name == (nome it) then it else rest) No{nome="not found", arestas=[]} nodes
 
 notPassed :: [No] -> No -> Bool
@@ -147,12 +152,12 @@ getTotalTime [] waitingTimes = 0.0
 getTotalTime [(Aresta {origem = origin, destino = destination, metodo = method, peso = length})] waitingTimes =
     if (isInfixOf "linha" method) then (getWaitingTime method waitingTimes) + length else length
 getTotalTime ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas) waitingTimes = (if (isInfixOf "linha" method) then (getWaitingTime method waitingTimes) + length else length) + (getTotalTime' method arestas waitingTimes)
-
-getTotalTime' :: String -> [Aresta] -> [TempoDeEspera] -> Float
-getTotalTime' _ [] waitingTimes = 0.0
-getTotalTime' ant ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas) waitingTimes
-    | (isInfixOf "linha" method) && (ant /= method) = (getWaitingTime method waitingTimes) + length + (getTotalTime' method arestas waitingTimes)
-    | otherwise = length + (getTotalTime' method arestas waitingTimes)
+    where
+        getTotalTime' :: String -> [Aresta] -> [TempoDeEspera] -> Float
+        getTotalTime' _ [] waitingTimes = 0.0
+        getTotalTime' ant ((Aresta {origem = origin, destino = destination, metodo = method, peso = length}):arestas) waitingTimes
+            | (isInfixOf "linha" method) && (ant /= method) = (getWaitingTime method waitingTimes) + length + (getTotalTime' method arestas waitingTimes)
+            | otherwise = length + (getTotalTime' method arestas waitingTimes)
   
 getShortestTime :: [[Aresta]] -> [TempoDeEspera] -> Float
 getShortestTime (path:paths) waitingTimes = foldl (\acc it -> if (getTotalTime it waitingTimes) < acc then (getTotalTime it waitingTimes) else acc) (getTotalTime path waitingTimes) paths
@@ -165,8 +170,8 @@ pathToString path = (origem (head path)) ++ " " ++ foldr(\Aresta {destino=destin
 
 main = do 
     putStrLn "Hello World"
-    contents <- readFile "in.in"
-    -- contents <- getContents
+    -- contents <- readFile "in.in"
+    contents <- getContents
     let l = lines contents
     let nodes = getNodes l
     let waitingTimes = getWaitingTimes l
