@@ -169,22 +169,18 @@ pathToString :: [Aresta] -> String
 pathToString path = (origem (head path)) ++ " " ++ foldr(\Aresta {destino=destino, metodo=metodo} rest -> metodo ++ " " ++ destino ++ " " ++ rest) "" path
 
 main = do 
-    -- putStrLn "Hello World"
     -- contents <- readFile "in.in"
     contents <- getContents
     let l = lines contents
     let nodes = getNodes l
     let waitingTimes = getWaitingTimes l
     let graph =  Grafo { nos = getLinks nodes l}
-    -- putStrLn (show graph)
-    --putStrLn (foldr (\it rest -> (show it) ++ rest) "" waitingTimes)
-    --putStrLn (show (getNodeByName (nos graph) "a"))
-    --putStrLn (show (filteredLinks (nos graph) (arestas (getNodeByName (nos graph) "a")) []))
+
     let originDestination = getOriginDestination l
     let possiblePaths = getPossiblePaths graph (fst originDestination) (snd originDestination)
     let shortestTime = getShortestTime possiblePaths waitingTimes
     let shortestPath = getShortestPath possiblePaths waitingTimes
-    -- putStrLn (show originDestination)
-    -- putStrLn (show possiblePaths)
+
+    
     putStrLn (pathToString shortestPath)
     putStrLn (show shortestTime)
